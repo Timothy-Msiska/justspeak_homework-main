@@ -1,5 +1,5 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { createClient } from '@supabase/supabase-js';
 
@@ -16,13 +16,24 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Lazy singleton — only initialised in the browser, never on the server.
+// This prevents the `auth/invalid-api-key` crash during Next.js SSR/prerender.
+function getFirebaseApp(): FirebaseApp {
+  return getApps().length ? getApp() : initializeApp(firebaseConfig);
+}
 
-export const auth = getAuth(firebaseApp);
+export function getFirebaseAuth(): Auth {
+  return getAuth(getFirebaseApp());
+}
+
+// Keep a module-level `auth` export for the rare places that import it
+// directly, but guard it so it is undefined during SSR.
+export const auth: Auth =
+  typeof window !== 'undefined' ? getFirebaseAuth() : (null as unknown as Auth);
 
 export const analytics =
   typeof window !== 'undefined'
-    ? isSupported().then((yes) => yes && getAnalytics(firebaseApp))
+    ? isSupported().then((yes) => yes && getAnalytics(getFirebaseApp()))
     : null;
 
 // --------------------
