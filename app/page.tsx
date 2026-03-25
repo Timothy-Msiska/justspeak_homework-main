@@ -110,32 +110,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Demo Credentials */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-border">
-        <div className="bg-muted/50 rounded-lg p-8 text-center">
-          <h2 className="font-semibold mb-4">Try the Demo</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="font-medium mb-2">Teacher Account</h3>
-              <p className="text-sm text-muted-foreground">
-                Email: <code className="bg-background px-2 py-1 rounded">teacher@example.com</code>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Password: <code className="bg-background px-2 py-1 rounded">password</code>
-              </p>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2">Student Account</h3>
-              <p className="text-sm text-muted-foreground">
-                Email: <code className="bg-background px-2 py-1 rounded">student1@example.com</code>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Password: <code className="bg-background px-2 py-1 rounded">password</code>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
