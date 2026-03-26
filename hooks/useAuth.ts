@@ -12,7 +12,7 @@ import {
   sendPasswordResetEmail,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { auth, supabase } from '@/lib/firebase';
+import { getFirebaseAuth, supabase } from '@/lib/firebase';
 import type { DBUser } from '@/lib/db';
 
 const googleProvider = new GoogleAuthProvider();
@@ -54,7 +54,7 @@ export function useAuth() {
   // 🔁 Firebase handles the session; Supabase provides the profile + role
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
-      auth,
+      getFirebaseAuth(),
       async (firebaseUser: FirebaseUser | null) => {
         if (firebaseUser) {
           const profile = await fetchProfile(firebaseUser.uid);
@@ -63,7 +63,7 @@ export function useAuth() {
             setIsAuthenticated(true);
           } else {
             // Profile missing — sign out to avoid broken state
-            await signOut(auth);
+            await signOut(getFirebaseAuth());
             setUser(null);
             setIsAuthenticated(false);
           }
@@ -78,12 +78,11 @@ export function useAuth() {
     return () => unsubscribe();
   }, []);
 
-  // ✅ LOGIN — Firebase authenticates, Supabase provides the profile
+  // ✅ LOGIN
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged above will handle setting the user
+      await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
     } catch (error: any) {
       throw new Error(error.message);
     } finally {
@@ -91,7 +90,7 @@ export function useAuth() {
     }
   }, []);
 
-  // ✅ SIGNUP — Firebase creates the account, Supabase stores the profile
+  // ✅ SIGNUP
   const signup = useCallback(async (
     email: string,
     password: string,
@@ -101,15 +100,13 @@ export function useAuth() {
     setIsLoading(true);
     try {
       const { user: firebaseUser } = await createUserWithEmailAndPassword(
-        auth,
+        getFirebaseAuth(),
         email,
         password
       );
 
-      // Set display name on Firebase profile
       await updateProfile(firebaseUser, { displayName: name });
 
-      // Write profile to Supabase — this is the source of truth for role
       const profile = await createProfile(firebaseUser.uid, email, name, role);
       if (profile) {
         setUser(profile);
@@ -122,19 +119,17 @@ export function useAuth() {
     }
   }, []);
 
-  // ✅ GOOGLE SIGN IN — creates Supabase profile on first sign-in
+  // ✅ GOOGLE SIGN IN
   const signInWithGoogle = useCallback(async (
     role: 'teacher' | 'learner' = 'learner'
   ) => {
     setIsLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(getFirebaseAuth(), googleProvider);
       const firebaseUser = result.user;
 
-      // Check if profile already exists in Supabase
       let profile = await fetchProfile(firebaseUser.uid);
 
-      // First time signing in with Google — create the profile
       if (!profile) {
         profile = await createProfile(
           firebaseUser.uid,
@@ -157,11 +152,11 @@ export function useAuth() {
     }
   }, []);
 
-  // ✅ RESET PASSWORD — handled entirely by Firebase
+  // ✅ RESET PASSWORD
   const resetPassword = useCallback(async (email: string) => {
     setIsLoading(true);
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(getFirebaseAuth(), email);
     } catch (error: any) {
       throw new Error(error.message);
     } finally {
@@ -171,7 +166,7 @@ export function useAuth() {
 
   // ✅ LOGOUT
   const logout = useCallback(async () => {
-    await signOut(auth);
+    await signOut(getFirebaseAuth());
     setUser(null);
     setIsAuthenticated(false);
   }, []);

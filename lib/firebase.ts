@@ -1,10 +1,10 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // --------------------
-// 🔹 Firebase — Authentication only
+// 🔹 Firebase — lazy singleton
 // --------------------
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,8 +16,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Lazy singleton — only initialised in the browser, never on the server.
-// This prevents the `auth/invalid-api-key` crash during Next.js SSR/prerender.
 function getFirebaseApp(): FirebaseApp {
   return getApps().length ? getApp() : initializeApp(firebaseConfig);
 }
@@ -26,26 +24,38 @@ export function getFirebaseAuth(): Auth {
   return getAuth(getFirebaseApp());
 }
 
-// Keep a module-level `auth` export for the rare places that import it
-// directly, but guard it so it is undefined during SSR.
-export const auth: Auth =
-  typeof window !== 'undefined' ? getFirebaseAuth() : (null as unknown as Auth);
-
 export const analytics =
   typeof window !== 'undefined'
     ? isSupported().then((yes) => yes && getAnalytics(getFirebaseApp()))
     : null;
 
 // --------------------
-// 🔹 Supabase
+// 🔹 Supabase — lazy singleton
+// Never call createClient() at module level — it crashes during SSR/build
+// when NEXT_PUBLIC_SUPABASE_URL is not yet available.
 // --------------------
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
+let _supabase: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      }
+    );
   }
-);
+  return _supabase;
+}
+
+// Proxy so existing `import { supabase }` calls still work without changes —
+// the real client is only created on first property access (browser only).
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getSupabase() as any)[prop];
+  },
+});
