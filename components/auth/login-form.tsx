@@ -18,7 +18,7 @@ import { AlertCircle } from 'lucide-react';
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, resetPassword, isLoading } = useAuth();
+  const { login, resetPassword, signInWithGoogle, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,6 +51,16 @@ export function LoginForm() {
       setShowReset(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reset failed');
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    try {
+      setError('');
+      await signInWithGoogle();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed');
     }
   }
 
@@ -125,6 +135,29 @@ export function LoginForm() {
               {isLoading ? 'Sending...' : 'Send Reset Email'}
             </Button>
           )}
+
+          {/* Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Button */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+          >
+            Continue with Google
+          </Button>
 
           {/* Links */}
           <div className="text-sm text-center space-y-2">
