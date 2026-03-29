@@ -35,7 +35,9 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="p-8">
+        {/* Spacer for mobile top bar */}
+        <div className="h-14 md:hidden" />
+        <div className="p-4 md:p-8">
           {children}
         </div>
       </main>

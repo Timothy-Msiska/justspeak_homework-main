@@ -89,7 +89,7 @@ export default function TeacherDashboard() {
       </DashboardHeader>
 
       {/* Summary Cards */}
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Assignments</CardTitle>
@@ -132,7 +132,7 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Recent Assignments + Pending Submissions */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid md:grid-cols-3 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
         <Link href="/dashboard/teacher/assignments">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardHeader className="pb-4">

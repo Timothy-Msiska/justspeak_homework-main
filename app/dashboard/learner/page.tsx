@@ -95,7 +95,7 @@ export default function LearnerDashboard() {
       </DashboardHeader>
 
       {/* Summary Cards */}
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
@@ -138,7 +138,7 @@ export default function LearnerDashboard() {
       </div>
 
       {/* Pending Assignments + Recent Grades */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Pending */}
         <Card>
@@ -237,7 +237,7 @@ export default function LearnerDashboard() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid md:grid-cols-3 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
         <Link href="/dashboard/learner/assignments">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardHeader className="pb-4">
